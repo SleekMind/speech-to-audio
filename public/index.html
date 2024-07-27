@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speech to Text</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px solid #ccc;
+        }
+        #error {
+            color: red;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Speech to Text</h1>
+    <button id="start">Start Recording</button>
+    <button id="stop">Stop Recording</button>
+    <div id="result">Result will be displayed here</div>
+    <div id="error"></div>
+
+    <script>
+        const startButton = document.getElementById('start');
+        const stopButton = document.getElementById('stop');
+        const resultDiv = document.getElementById('result');
+        const errorDiv = document.getElementById('error');
+
+        let recognition;
+
+        if ('webkitSpeechRecognition' in window) {
+            recognition = new webkitSpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+
+            recognition.onstart = function() {
+                resultDiv.innerHTML = 'Listening...';
+                errorDiv.innerHTML = '';
+            };
+
+            recognition.onresult = function(event) {
+                let interimTranscript = '';
+                let finalTranscript = '';
+
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript;
+                    } else {
+                        interimTranscript += event.results[i][0].transcript;
+                    }
+                }
+
+                resultDiv.innerHTML = finalTranscript + '<i style="color:#999;">' + interimTranscript + '</i>';
+            };
+
+            recognition.onerror = function(event) {
+                console.error('Error occurred in recognition: ', event.error);
+                errorDiv.innerHTML = 'Error: ' + event.error;
+                if (event.error === 'not-allowed') {
+                    errorDiv.innerHTML += '. Please check your microphone permissions.';
+                } else if (event.error === 'network') {
+                    errorDiv.innerHTML += '. Please check your network connection.';
+                }
+            };
+
+            recognition.onend = function() {
+                resultDiv.innerHTML = 'Click "Start Recording" to try again.';
+            };
+
+            startButton.addEventListener('click', () => {
+                recognition.start();
+            });
+
+            stopButton.addEventListener('click', () => {
+                recognition.stop();
+            });
+        } else {
+            resultDiv.innerHTML = 'Your browser does not support the Web Speech API. Please use Chrome.';
+        }
+    </script>
+</body>
+</html>
