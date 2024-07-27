@@ -1,0 +1,32 @@
+const express = require("express");
+const bodyParser = require("body-parser");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+// Replace with your actual API key
+const API_KEY = "AIzaSyDH6IhraRmv60SqTfCJ1SDJ4ecJdturVZk";
+
+const app = express();
+const port = process.env.PORT || 3000;
+
+app.use(bodyParser.json()); // Middleware to parse JSON bodies
+
+console.log(API_KEY);
+const genAI = new GoogleGenerativeAI(API_KEY);
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+async function generateContent(prompt) {
+    try {
+        const result = await model.generateContent([prompt]);
+        // console.log('Generated Content:', result.response.text());
+        return result;
+    } catch (error) {
+        console.error("Error generating content:", error);
+    }
+}
+
+
+
+
+module.exports = {
+    generateContent,
+}
