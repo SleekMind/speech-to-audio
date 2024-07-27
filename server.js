@@ -20,7 +20,7 @@ app.get('/', (req, res) => {
 app.get('/generate', async (req, res) => {
     const text = req.query.text;
     console.log(text);
-    const result = await generateContent(text + `{
+    const result = await generateContent(text + "send the string of json without any spaces and /n's and will able to conver tthat string .json function in next step" + `{
         "report": {
           "patient_symptoms": {
             "anemia": [
@@ -80,7 +80,8 @@ app.get('/generate', async (req, res) => {
 
     // Preprocess the result to get the actual JSON
     // Send the JSON response to the frontend
-
+    // console.log(result);
+    console.log(result);
     res.json(result);
 });
 

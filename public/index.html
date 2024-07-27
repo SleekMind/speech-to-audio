@@ -39,21 +39,29 @@
             border: 1px solid #ccc;
             background-color: white;
             width: 80%;
-            max-width: 600px;
+            max-width: 800px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            overflow-wrap: break-word;
+            overflow: auto;
         }
         #error {
             color: red;
             margin-top: 20px;
         }
-        .json-key {
-            color: brown;
-            font-weight: bold;
+        table {
+            width: 100%;
+            border-collapse: collapse;
         }
-        .json-value {
-            color: darkblue;
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+            text-align: left;
+        }
+        td {
+            word-break: break-word;
         }
     </style>
 </head>
@@ -137,28 +145,35 @@
         }
 
         function displayJson(data) {
-            const formattedJson = syntaxHighlight(data);
-            resultDiv.innerHTML = `<pre>${formattedJson}</pre>`;
-        }
+            let html = '<table>';
 
-        function syntaxHighlight(json) {
-            if (typeof json !== 'string') {
-                json = JSON.stringify(json, undefined, 2);
-            }
-            json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|\d+)/g, function (match) {
-                let cls = 'json-value';
-                if (/^"/.test(match)) {
-                    if (/:$/.test(match)) {
-                        cls = 'json-key';
+            function createTableFromJson(jsonObject, parentKey = '') {
+                for (const key in jsonObject) {
+                    if (jsonObject.hasOwnProperty(key)) {
+                        const value = jsonObject[key];
+                        if (typeof value === 'object' && !Array.isArray(value) && value !== null) {
+                            html += `<tr><th colspan="2">${parentKey ? parentKey + '.' : ''}${key}</th></tr>`;
+                            createTableFromJson(value, key);
+                        } else if (Array.isArray(value)) {
+                            html += `<tr><th colspan="2">${parentKey ? parentKey + '.' : ''}${key}</th></tr>`;
+                            value.forEach((item, index) => {
+                                if (typeof item === 'object') {
+                                    createTableFromJson(item, `${key}[${index}]`);
+                                } else {
+                                    html += `<tr><td>${key}[${index}]</td><td>${item}</td></tr>`;
+                                }
+                            });
+                        } else {
+                            html += `<tr><td>${parentKey ? parentKey + '.' : ''}${key}</td><td>${value}</td></tr>`;
+                        }
                     }
-                } else if (/true|false/.test(match)) {
-                    cls = 'json-value';
-                } else if (/null/.test(match)) {
-                    cls = 'json-value';
                 }
-                return '<span class="' + cls + '">' + match + '</span>';
-            });
+            }
+
+            createTableFromJson(data);
+            html += '</table>';
+
+            resultDiv.innerHTML = html;
         }
     </script>
 </body>
